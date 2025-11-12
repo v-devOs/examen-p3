@@ -1,3 +1,4 @@
+"use server";
 import { cookies } from "next/headers";
 
 const TOKEN_NAME = "auth_token";
@@ -47,7 +48,9 @@ export async function isAuthenticated(): Promise<boolean> {
  * Decodifica el payload del JWT sin verificar la firma
  * Útil para extraer información básica del token
  */
-export function decodeJWT(token: string): Record<string, unknown> | null {
+export async function decodeJWT(
+  token: string
+): Promise<Record<string, unknown> | null> {
   try {
     const base64Url = token.split(".")[1];
     if (!base64Url) return null;
@@ -70,8 +73,8 @@ export function decodeJWT(token: string): Record<string, unknown> | null {
 /**
  * Verifica si el token JWT ha expirado
  */
-export function isTokenExpired(token: string): boolean {
-  const decoded = decodeJWT(token);
+export async function isTokenExpired(token: string): Promise<boolean> {
+  const decoded = await decodeJWT(token);
   if (!decoded || !decoded.exp) return true;
 
   const expirationTime = (decoded.exp as number) * 1000; // Convertir a milisegundos
