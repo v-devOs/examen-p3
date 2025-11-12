@@ -10,10 +10,10 @@ export default function ScheduleDetailedCard({
   formatTime,
 }: ScheduleDetailedCardProps) {
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border-2 border-gray-100 hover:border-blue-300 hover:shadow-lg transition-all duration-200">
+    <div className="bg-linear-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 border-2 border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-200">
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
         {/* Horario destacado */}
-        <div className="flex-shrink-0 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl p-4 text-center min-w-[120px]">
+        <div className="shrink-0 bg-linear-to-br from-blue-500 to-indigo-600 text-white rounded-xl p-4 text-center min-w-[120px]">
           <div className="text-2xl font-bold">{formatTime(clase.hora_inicio)}</div>
           <div className="text-sm opacity-90">a</div>
           <div className="text-xl font-bold">{formatTime(clase.hora_fin)}</div>
@@ -22,17 +22,17 @@ export default function ScheduleDetailedCard({
         {/* Información de la clase */}
         <div className="flex-1 space-y-3">
           <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-1">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
               {clase.nombre_materia}
             </h3>
-            <p className="text-gray-600">{clase.clave_materia}</p>
+            <p className="text-gray-600 dark:text-gray-400">{clase.clave_materia}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             {clase.aula && (
-              <div className="flex items-center text-gray-700">
+              <div className="flex items-center text-gray-700 dark:text-gray-300">
                 <svg
-                  className="w-5 h-5 mr-2 text-purple-500"
+                  className="w-5 h-5 mr-2 text-purple-500 dark:text-purple-400 shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -49,9 +49,9 @@ export default function ScheduleDetailedCard({
             )}
 
             {clase.letra_grupo && (
-              <div className="flex items-center text-gray-700">
+              <div className="flex items-center text-gray-700 dark:text-gray-300">
                 <svg
-                  className="w-5 h-5 mr-2 text-green-500"
+                  className="w-5 h-5 mr-2 text-green-500 dark:text-green-400 shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

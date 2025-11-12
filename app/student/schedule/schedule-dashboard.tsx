@@ -99,7 +99,7 @@ export default function ScheduleDashboard({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <ScheduleHeader
@@ -111,7 +111,7 @@ export default function ScheduleDashboard({
         />
 
         {/* Estadísticas */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 p-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <ScheduleStatsCard
               title="Total Materias"
@@ -194,7 +194,7 @@ export default function ScheduleDashboard({
 
         {/* Vista Semanal */}
         {viewMode === "weekly" && (
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 overflow-x-auto">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 p-6 overflow-x-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {availableDays.map((dia) => {
                 const clasesDelDia = classesByDay[dia];
@@ -202,9 +202,9 @@ export default function ScheduleDashboard({
 
                 return (
                   <div key={dia} className="space-y-4">
-                    <h3 className="text-lg font-bold text-gray-900 sticky top-0 bg-white/90 backdrop-blur-sm py-2 rounded-xl px-4">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white sticky top-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm py-2 rounded-xl px-4">
                       {dia}
-                      <span className="ml-2 text-sm font-normal text-gray-500">
+                      <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
                         ({clasesDelDia.length} {clasesDelDia.length === 1 ? "clase" : "clases"})
                       </span>
                     </h3>
@@ -222,15 +222,15 @@ export default function ScheduleDashboard({
 
         {/* Vista Diaria (seleccionando un día específico) */}
         {viewMode === "daily" && (
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 p-6">
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
               {availableDays.map((dia) => (
                 <button
                   key={dia}
                   onClick={() => setSelectedDay(dia)}
                   className={`px-6 py-3 rounded-xl font-medium whitespace-nowrap transition-all ${selectedDay === dia
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                     }`}
                 >
                   {dia}
@@ -245,19 +245,19 @@ export default function ScheduleDashboard({
               {(selectedDay === "all" ? filteredClasses : classesByDay[selectedDay] || [])
                 .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
                 .map((clase) => (
-                  <ScheduleDetailedCard 
-                    key={`${clase.id_grupo}-${clase.dia}`} 
-                    clase={clase} 
-                    formatTime={formatTime} 
+                  <ScheduleDetailedCard
+                    key={`${clase.id_grupo}-${clase.dia}`}
+                    clase={clase}
+                    formatTime={formatTime}
                   />
                 ))}
 
               {(selectedDay === "all" ? filteredClasses : classesByDay[selectedDay] || [])
                 .length === 0 && (
                   <div className="text-center py-12">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
                       <svg
-                        className="w-8 h-8 text-gray-400"
+                        className="w-8 h-8 text-gray-400 dark:text-gray-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -270,7 +270,7 @@ export default function ScheduleDashboard({
                         />
                       </svg>
                     </div>
-                    <p className="text-gray-500">No hay clases para este día</p>
+                    <p className="text-gray-500 dark:text-gray-400">No hay clases para este día</p>
                   </div>
                 )}
             </div>
@@ -279,10 +279,10 @@ export default function ScheduleDashboard({
 
         {/* Vista Lista */}
         {viewMode === "list" && (
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                <thead className="bg-linear-to-r from-blue-600 to-indigo-600 text-white">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold">Día</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold">Horario</th>
@@ -292,7 +292,7 @@ export default function ScheduleDashboard({
                     <th className="px-6 py-4 text-left text-sm font-semibold">Aula</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredClasses
                     .sort((a, b) => {
                       const diaCompare = DIAS_SEMANA.indexOf(a.dia) - DIAS_SEMANA.indexOf(b.dia);
@@ -302,27 +302,27 @@ export default function ScheduleDashboard({
                     .map((clase) => (
                       <tr
                         key={`${clase.id_grupo}-${clase.dia}`}
-                        className="hover:bg-blue-50/50 transition-colors"
+                        className="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 transition-colors"
                       >
                         <td className="px-6 py-4">
-                          <span className="font-medium text-gray-900">{clase.dia}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{clase.dia}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-blue-600 font-medium">
+                          <span className="text-blue-600 dark:text-blue-400 font-medium">
                             {formatTime(clase.hora_inicio)} - {formatTime(clase.hora_fin)}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="font-medium text-gray-900">{clase.nombre_materia}</div>
+                          <div className="font-medium text-gray-900 dark:text-white">{clase.nombre_materia}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-gray-600">{clase.clave_materia}</span>
+                          <span className="text-gray-600 dark:text-gray-400">{clase.clave_materia}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-gray-700">{clase.letra_grupo}</span>
+                          <span className="text-gray-700 dark:text-gray-300">{clase.letra_grupo}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-gray-700">
+                          <span className="text-gray-700 dark:text-gray-300">
                             {clase.aula || "-"}
                           </span>
                         </td>
@@ -333,9 +333,9 @@ export default function ScheduleDashboard({
 
               {filteredClasses.length === 0 && (
                 <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
                     <svg
-                      className="w-8 h-8 text-gray-400"
+                      className="w-8 h-8 text-gray-400 dark:text-gray-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -348,7 +348,7 @@ export default function ScheduleDashboard({
                       />
                     </svg>
                   </div>
-                  <p className="text-gray-500">No se encontraron clases</p>
+                  <p className="text-gray-500 dark:text-gray-400">No se encontraron clases</p>
                 </div>
               )}
             </div>

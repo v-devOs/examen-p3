@@ -7,20 +7,20 @@ interface ScheduleCardProps {
 
 export default function ScheduleCard({ clase, formatTime }: ScheduleCardProps) {
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 border-2 border-gray-100 hover:border-blue-300 hover:shadow-lg transition-all duration-200">
+    <div className="bg-linear-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-4 border-2 border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-200">
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
-          <h4 className="font-semibold text-gray-900 text-sm mb-1">
+          <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
             {clase.nombre_materia}
           </h4>
-          <p className="text-xs text-gray-500">{clase.clave_materia}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{clase.clave_materia}</p>
         </div>
       </div>
 
       <div className="space-y-2 text-sm">
-        <div className="flex items-center text-blue-600">
+        <div className="flex items-center text-blue-600 dark:text-blue-400">
           <svg
-            className="w-4 h-4 mr-2"
+            className="w-4 h-4 mr-2 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -38,9 +38,9 @@ export default function ScheduleCard({ clase, formatTime }: ScheduleCardProps) {
         </div>
 
         {clase.aula && (
-          <div className="flex items-center text-gray-600">
+          <div className="flex items-center text-gray-600 dark:text-gray-400">
             <svg
-              className="w-4 h-4 mr-2"
+              className="w-4 h-4 mr-2 shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -57,9 +57,9 @@ export default function ScheduleCard({ clase, formatTime }: ScheduleCardProps) {
         )}
 
         {clase.letra_grupo && (
-          <div className="flex items-center text-gray-600">
+          <div className="flex items-center text-gray-600 dark:text-gray-400">
             <svg
-              className="w-4 h-4 mr-2"
+              className="w-4 h-4 mr-2 shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
