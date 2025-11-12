@@ -3,10 +3,21 @@
  */
 
 export { getGradesAction, refreshGradesAction } from "./actions";
-export { gradeSchema, gradesListSchema, gradesResponseSchema } from "./schemas";
+export {
+  partialGradeSchema,
+  subjectInfoSchema,
+  subjectWithGradesSchema,
+  periodInfoSchema,
+  periodWithSubjectsSchema,
+  gradesDataSchema,
+} from "./schemas";
 export type {
-  Grade,
-  GradesList,
-  GradesResponse,
+  PartialGrade,
+  SubjectInfo,
+  SubjectWithGrades,
+  PeriodInfo,
+  PeriodWithSubjects,
+  GradesData,
+  ProcessedGrade,
   GradesActionResult,
 } from "./schemas";

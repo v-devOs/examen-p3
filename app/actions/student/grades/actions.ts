@@ -1,8 +1,8 @@
 "use server";
 
 import { getAuthToken } from "../../login/jwt-utils";
-import { gradesListSchema } from "./schemas";
-import type { GradesActionResult } from "./schemas";
+import { gradesDataSchema } from "./schemas";
+import type { GradesActionResult, ProcessedGrade } from "./schemas";
 
 const API_BASE_URL = "https://cetech.roque.tecnm.mx/api";
 
@@ -152,32 +152,169 @@ export async function getGradesAction(): Promise<GradesActionResult> {
     }
 
     console.log(
-      `📊 [GRADES] Total de calificaciones encontradas: ${gradesData.length}`
+      `📊 [GRADES] Total de periodos encontrados: ${gradesData.length}`
     );
 
     // Validar y transformar los datos con el schema de Zod
     console.log("🔄 [GRADES] Validando y transformando datos con Zod...");
     try {
-      const validatedData = gradesListSchema.parse(gradesData);
-      console.log("✅ [GRADES] Datos validados y transformados:");
+      const validatedData = gradesDataSchema.parse(gradesData);
+      console.log("✅ [GRADES] Datos validados exitosamente");
+
+      // Procesar los datos: aplanar la estructura anidada
+      console.log("🔄 [GRADES] Procesando datos para la UI...");
+      const processedGrades: ProcessedGrade[] = [];
+
+      for (const periodo of validatedData) {
+        for (const materiaData of periodo.materias) {
+          // Obtener calificaciones parciales
+          const parciales = materiaData.calificaiones;
+          const parcial1 = parciales.find(
+            (p) => p.numero_calificacion === 1
+          )?.calificacion;
+          const parcial2 = parciales.find(
+            (p) => p.numero_calificacion === 2
+          )?.calificacion;
+          const parcial3 = parciales.find(
+            (p) => p.numero_calificacion === 3
+          )?.calificacion;
+          const parcial4 = parciales.find(
+            (p) => p.numero_calificacion === 4
+          )?.calificacion;
+
+          // Calcular promedio de parciales disponibles
+          const calificacionesValidas = [parcial1, parcial2, parcial3, parcial4]
+            .filter((cal) => cal !== null)
+            .map((cal) => parseFloat(cal as string));
+
+          const promedio =
+            calificacionesValidas.length > 0
+              ? (
+                  calificacionesValidas.reduce((sum, cal) => sum + cal, 0) /
+                  calificacionesValidas.length
+                ).toFixed(2)
+              : null;
+
+          processedGrades.push({
+            nombre_materia: materiaData.materia.nombre_materia,
+            clave_materia: materiaData.materia.clave_materia,
+            grupo: materiaData.materia.letra_grupo,
+            id_grupo: materiaData.materia.id_grupo,
+            periodo: periodo.periodo.clave_periodo,
+            periodo_descripcion: periodo.periodo.descripcion_periodo,
+            anio: periodo.periodo.anio,
+            parcial1: parcial1 ?? null,
+            parcial2: parcial2 ?? null,
+            parcial3: parcial3 ?? null,
+            parcial4: parcial4 ?? null,
+            promedio,
+          });
+        }
+      }
+
       console.log(
-        `✓ ${validatedData.length} calificaciones procesadas exitosamente`
+        `✓ ${processedGrades.length} materias procesadas exitosamente`
+      );
+      console.log(
+        "📊 [GRADES] Ejemplo de datos procesados:",
+        processedGrades[0]
       );
 
       return {
         success: true,
-        data: validatedData,
+        data: processedGrades,
       };
     } catch (zodError) {
       console.error("❌ [GRADES] Error de validación Zod:", zodError);
-      // Si falla la validación, retornar los datos sin transformar
-      console.log(
-        "⚠️ [GRADES] Retornando datos sin validar debido a error en schema"
-      );
-      return {
-        success: true,
-        data: gradesData,
-      };
+      // Intentar procesar sin validación
+      console.log("⚠️ [GRADES] Intentando procesar sin validación Zod...");
+
+      try {
+        const processedGrades: ProcessedGrade[] = [];
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        for (const periodo of gradesData as any[]) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          for (const materiaData of periodo.materias as any[]) {
+            const parciales = materiaData.calificaiones || [];
+            const parcial1 = parciales.find(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (p: any) => p.numero_calificacion === 1
+            )?.calificacion;
+            const parcial2 = parciales.find(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (p: any) => p.numero_calificacion === 2
+            )?.calificacion;
+            const parcial3 = parciales.find(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (p: any) => p.numero_calificacion === 3
+            )?.calificacion;
+            const parcial4 = parciales.find(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (p: any) => p.numero_calificacion === 4
+            )?.calificacion;
+
+            const calificacionesValidas = [
+              parcial1,
+              parcial2,
+              parcial3,
+              parcial4,
+            ]
+              .filter((cal) => cal !== null && cal !== undefined)
+              .map((cal) => parseFloat(cal as string));
+
+            const promedio =
+              calificacionesValidas.length > 0
+                ? (
+                    calificacionesValidas.reduce((sum, cal) => sum + cal, 0) /
+                    calificacionesValidas.length
+                  ).toFixed(2)
+                : null;
+
+            processedGrades.push({
+              nombre_materia: materiaData.materia.nombre_materia,
+              clave_materia: materiaData.materia.clave_materia,
+              grupo: materiaData.materia.letra_grupo,
+              id_grupo: materiaData.materia.id_grupo,
+              periodo: periodo.periodo.clave_periodo,
+              periodo_descripcion: periodo.periodo.descripcion_periodo,
+              anio: periodo.periodo.anio,
+              parcial1:
+                parcial1 !== null && parcial1 !== undefined
+                  ? parseFloat(parcial1).toFixed(2)
+                  : null,
+              parcial2:
+                parcial2 !== null && parcial2 !== undefined
+                  ? parseFloat(parcial2).toFixed(2)
+                  : null,
+              parcial3:
+                parcial3 !== null && parcial3 !== undefined
+                  ? parseFloat(parcial3).toFixed(2)
+                  : null,
+              parcial4:
+                parcial4 !== null && parcial4 !== undefined
+                  ? parseFloat(parcial4).toFixed(2)
+                  : null,
+              promedio,
+            });
+          }
+        }
+
+        console.log(
+          `✓ ${processedGrades.length} materias procesadas sin validación`
+        );
+
+        return {
+          success: true,
+          data: processedGrades,
+        };
+      } catch (processError) {
+        console.error("❌ [GRADES] Error al procesar datos:", processError);
+        return {
+          success: false,
+          error: "Error al procesar las calificaciones",
+        };
+      }
     }
   } catch (error) {
     console.error("💥 [GRADES] Excepción capturada:", error);

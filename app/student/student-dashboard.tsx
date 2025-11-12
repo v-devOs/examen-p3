@@ -322,7 +322,10 @@ export default function StudentDashboard({
               </div>
 
               <div className="space-y-3">
-                <button className="w-full px-4 py-3 bg-linear-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group">
+                <button
+                  onClick={() => router.push("/student/grades")}
+                  className="w-full px-4 py-3 bg-linear-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group"
+                >
                   <span>📊 Calificaciones</span>
                   <svg
                     className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
