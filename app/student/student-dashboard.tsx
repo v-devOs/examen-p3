@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { logoutAction } from "../actions/login";
 import { refreshStudentInfoAction } from "../actions/student/info";
 import type { StudentInfo } from "../actions/student/info";
@@ -36,7 +37,7 @@ export default function StudentDashboard({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 relative overflow-hidden">
       {/* Decoración de fondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-3xl"></div>
@@ -142,18 +143,157 @@ export default function StudentDashboard({
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Renderizar dinámicamente los campos del estudiante */}
-              {Object.entries(studentData).map(([key, value]) => (
-                <div key={key} className="space-y-2">
+            {/* Sección de foto y datos principales */}
+            <div className="flex flex-col md:flex-row gap-6 mb-8 p-6 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl">
+              {/* Foto del estudiante */}
+              {studentData.foto && (
+                <div className="shrink-0">
+                  <div className="w-32 h-32 rounded-2xl overflow-hidden shadow-lg ring-4 ring-white dark:ring-gray-700">
+                    <Image
+                      src={`data:image/jpeg;base64,${studentData.foto}`}
+                      alt="Foto del estudiante"
+                      width={128}
+                      height={128}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Información principal */}
+              <div className="flex-1 space-y-3">
+                <div>
+                  <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Nombre Completo
+                  </p>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {studentData.persona}
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Número de Control
+                    </p>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white">
+                      {studentData.numero_control}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Correo Institucional
+                    </p>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white break-all">
+                      {studentData.email}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Información Académica */}
+            <div className="space-y-6">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <span className="text-2xl">📊</span>
+                Información Académica
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Semestre */}
+                <div className="space-y-2 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                   <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {formatFieldName(key)}
+                    Semestre Actual
                   </label>
-                  <p className="text-lg font-medium text-gray-900 dark:text-white break-words">
-                    {value?.toString() || "No disponible"}
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {studentData.semestre}°
                   </p>
                 </div>
-              ))}
+
+                {/* Porcentaje de Avance */}
+                {studentData.porcentaje_avance !== undefined && (
+                  <div className="space-y-2 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                    <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Avance de Carrera
+                    </label>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {studentData.porcentaje_avance}%
+                    </p>
+                  </div>
+                )}
+
+                {/* Promedio Ponderado */}
+                {studentData.promedio_ponderado && (
+                  <div className="space-y-2 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                    <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Promedio Ponderado
+                    </label>
+                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      {studentData.promedio_ponderado}
+                    </p>
+                  </div>
+                )}
+
+                {/* Promedio Aritmético */}
+                {studentData.promedio_aritmetico && (
+                  <div className="space-y-2 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
+                    <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Promedio Aritmético
+                    </label>
+                    <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                      {studentData.promedio_aritmetico}
+                    </p>
+                  </div>
+                )}
+
+                {/* Créditos Acumulados */}
+                {studentData.creditos_acumulados && (
+                  <div className="space-y-2 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                    <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Créditos Acumulados
+                    </label>
+                    <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                      {studentData.creditos_acumulados}
+                    </p>
+                  </div>
+                )}
+
+                {/* Materias Cursadas */}
+                {studentData.materias_cursadas && (
+                  <div className="space-y-2 p-4 bg-teal-50 dark:bg-teal-900/20 rounded-xl">
+                    <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Materias Cursadas
+                    </label>
+                    <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">
+                      {studentData.materias_cursadas}
+                    </p>
+                  </div>
+                )}
+
+                {/* Materias Aprobadas */}
+                {studentData.materias_aprobadas && (
+                  <div className="space-y-2 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                    <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Materias Aprobadas
+                    </label>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {studentData.materias_aprobadas}
+                    </p>
+                  </div>
+                )}
+
+                {/* Materias Reprobadas */}
+                {studentData.materias_reprobadas && (
+                  <div className="space-y-2 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                    <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Materias Reprobadas
+                    </label>
+                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      {studentData.materias_reprobadas}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -182,7 +322,7 @@ export default function StudentDashboard({
               </div>
 
               <div className="space-y-3">
-                <button className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group">
+                <button className="w-full px-4 py-3 bg-linear-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group">
                   <span>📊 Calificaciones</span>
                   <svg
                     className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
@@ -199,7 +339,7 @@ export default function StudentDashboard({
                   </svg>
                 </button>
 
-                <button className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group">
+                <button className="w-full px-4 py-3 bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group">
                   <span>📚 Kardex</span>
                   <svg
                     className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
@@ -216,7 +356,7 @@ export default function StudentDashboard({
                   </svg>
                 </button>
 
-                <button className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group">
+                <button className="w-full px-4 py-3 bg-linear-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group">
                   <span>🕒 Horarios</span>
                   <svg
                     className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
@@ -266,21 +406,4 @@ export default function StudentDashboard({
       </div>
     </div>
   );
-}
-
-// Función auxiliar para formatear nombres de campos
-function formatFieldName(key: string): string {
-  const fieldNames: Record<string, string> = {
-    id: "ID",
-    matricula: "Matrícula",
-    nombre: "Nombre",
-    apellidoPaterno: "Apellido Paterno",
-    apellidoMaterno: "Apellido Materno",
-    carrera: "Carrera",
-    semestre: "Semestre",
-    email: "Correo Electrónico",
-    telefono: "Teléfono",
-  };
-
-  return fieldNames[key] || key.charAt(0).toUpperCase() + key.slice(1);
 }

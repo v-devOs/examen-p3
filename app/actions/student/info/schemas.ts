@@ -2,18 +2,40 @@ import { z } from "zod";
 
 /**
  * Schema para la información del estudiante
+ * Basado en la respuesta real de la API
  */
 export const studentInfoSchema = z.object({
-  id: z.number(),
-  matricula: z.string(),
-  nombre: z.string(),
-  apellidoPaterno: z.string().optional(),
-  apellidoMaterno: z.string().optional(),
-  carrera: z.string().optional(),
-  semestre: z.number().optional(),
-  email: z.string().email().optional(),
-  telefono: z.string().optional(),
-  // Agrega más campos según la respuesta real de la API
+  numero_control: z.string(),
+  persona: z.string(),
+  email: z.string().email(),
+  semestre: z.number(),
+  num_mat_rep_no_acreditadas: z.string().optional(),
+  creditos_acumulados: z.string().optional(),
+  promedio_ponderado: z
+    .union([z.string(), z.number()])
+    .transform((val) => {
+      // Convertir a número y redondear a 2 decimales
+      const num = typeof val === "string" ? parseFloat(val) : val;
+      return isNaN(num) ? "0.00" : num.toFixed(2);
+    })
+    .optional(),
+  promedio_aritmetico: z
+    .union([z.string(), z.number()])
+    .transform((val) => {
+      // Convertir a número y redondear a 2 decimales
+      const num = typeof val === "string" ? parseFloat(val) : val;
+      return isNaN(num) ? "0.00" : num.toFixed(2);
+    })
+    .optional(),
+  materias_cursadas: z.string().optional(),
+  materias_reprobadas: z.string().optional(),
+  materias_aprobadas: z.string().optional(),
+  creditos_complementarios: z.number().optional(),
+  porcentaje_avance: z.number().optional(),
+  num_materias_rep_primera: z.number().optional(),
+  num_materias_rep_segunda: z.number().nullable().optional(),
+  percentaje_avance_cursando: z.number().optional(),
+  foto: z.string().optional(), // Base64 string de la foto
 });
 
 /**
