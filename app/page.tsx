@@ -21,7 +21,7 @@ export default function Home() {
 
     if (result.success) {
       // Redirigir al dashboard después del login exitoso
-      router.push("/dashboard");
+      router.push("/student");
     } else {
       setError(result.error);
       if (result.fieldErrors) {
