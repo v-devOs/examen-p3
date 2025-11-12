@@ -59,19 +59,25 @@ export async function loginAction(
     if (data.status && data.status !== 200) {
       // Mensaje personalizado según el código de error
       let errorMessage = "";
-      
+
       if (data.status === 401) {
-        errorMessage = "Las credenciales ingresadas son incorrectas. Por favor, verifica que tu correo electrónico institucional (@celaya.tecnm.mx) y contraseña sean correctos.";
+        errorMessage =
+          "Las credenciales ingresadas son incorrectas. Por favor, verifica que tu correo electrónico institucional (@celaya.tecnm.mx) y contraseña sean correctos.";
       } else if (data.status === 403) {
-        errorMessage = "No tienes permiso para acceder al sistema. Contacta al administrador.";
+        errorMessage =
+          "No tienes permiso para acceder al sistema. Contacta al administrador.";
       } else if (data.status === 404) {
         errorMessage = "Usuario no encontrado en el sistema.";
       } else if (data.status >= 500) {
-        errorMessage = "El servidor está experimentando problemas. Por favor, intenta más tarde.";
+        errorMessage =
+          "El servidor está experimentando problemas. Por favor, intenta más tarde.";
       } else {
-        errorMessage = data.message || data.responseCodeTxt || `Error ${data.status}: No se pudo completar el inicio de sesión.`;
+        errorMessage =
+          data.message ||
+          data.responseCodeTxt ||
+          `Error ${data.status}: No se pudo completar el inicio de sesión.`;
       }
-      
+
       return {
         success: false,
         error: errorMessage,
@@ -89,14 +95,17 @@ export async function loginAction(
 
     // Verificar que se recibió un token
     // La API devuelve el token en data.message.login.token
-    const token = 
-      data.message?.login?.token || 
-      data.token || 
-      data.access_token || 
+    const token =
+      data.message?.login?.token ||
+      data.token ||
+      data.access_token ||
       data.data?.token;
-    
-    if (!token || typeof token !== 'string') {
-      console.error("Estructura de respuesta completa:", JSON.stringify(data, null, 2));
+
+    if (!token || typeof token !== "string") {
+      console.error(
+        "Estructura de respuesta completa:",
+        JSON.stringify(data, null, 2)
+      );
       return {
         success: false,
         error: "No se recibió un token de autenticación válido",
