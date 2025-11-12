@@ -8,8 +8,10 @@ export { getKardexAction, refreshKardexAction } from "./actions";
 // Exportar schemas y tipos
 export {
   kardexSubjectSchema,
+  kardexResponseSchema,
   kardexListSchema,
   type KardexSubject,
+  type KardexResponse,
   type KardexList,
   type KardexActionResult,
 } from "./schemas";

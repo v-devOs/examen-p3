@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthToken } from "../../login/jwt-utils";
-import { kardexListSchema, type KardexActionResult } from "./schemas";
+import { kardexResponseSchema, type KardexActionResult } from "./schemas";
 
 const API_BASE_URL = "https://cetech.roque.tecnm.mx/api";
 
@@ -76,16 +76,29 @@ export async function getKardexAction(): Promise<KardexActionResult> {
       )}`
     );
 
-    if (Array.isArray(kardexData)) {
-      console.log(`📊 [KARDEX] Total de materias: ${kardexData.length}`);
+    // Verificar si es un objeto con la estructura esperada
+    if (
+      typeof kardexData === "object" &&
+      kardexData !== null &&
+      "kardex" in kardexData
+    ) {
+      console.log("📦 [KARDEX] Estructura detectada: objeto con kardex array");
+      console.log(
+        `📊 [KARDEX] Total de materias: ${kardexData.kardex?.length || 0}`
+      );
+      console.log(
+        `📈 [KARDEX] Porcentaje de avance: ${
+          kardexData.porcentaje_avance || "N/A"
+        }%`
+      );
 
       // Log de la primera materia para análisis
-      if (kardexData.length > 0) {
+      if (Array.isArray(kardexData.kardex) && kardexData.kardex.length > 0) {
         console.log("🔎 [KARDEX] Estructura de la primera materia:");
-        console.log(JSON.stringify(kardexData[0], null, 2));
+        console.log(JSON.stringify(kardexData.kardex[0], null, 2));
         console.log(
           "🔑 [KARDEX] Campos disponibles:",
-          Object.keys(kardexData[0])
+          Object.keys(kardexData.kardex[0])
         );
       }
     }
@@ -93,21 +106,25 @@ export async function getKardexAction(): Promise<KardexActionResult> {
     try {
       // Intentar validar con Zod
       console.log("🔄 [KARDEX] Validando datos con Zod...");
-      const validatedData = kardexListSchema.parse(kardexData);
+      const validatedData = kardexResponseSchema.parse(kardexData);
 
       console.log(
-        `✅ [KARDEX] Validación exitosa! ${validatedData.length} materias procesadas`
+        `✅ [KARDEX] Validación exitosa! ${validatedData.kardex.length} materias procesadas`
+      );
+      console.log(
+        `📈 [KARDEX] Porcentaje de avance validado: ${validatedData.porcentaje_avance}%`
       );
 
       // Log de muestra de datos validados
-      if (validatedData.length > 0) {
+      if (validatedData.kardex.length > 0) {
         console.log("✨ [KARDEX] Ejemplo de materia validada:");
-        console.log(JSON.stringify(validatedData[0], null, 2));
+        console.log(JSON.stringify(validatedData.kardex[0], null, 2));
       }
 
       return {
         success: true,
-        data: validatedData,
+        data: validatedData.kardex,
+        porcentajeAvance: validatedData.porcentaje_avance,
       };
     } catch (zodError) {
       console.error("❌ [KARDEX] Error de validación Zod:", zodError);
@@ -116,16 +133,22 @@ export async function getKardexAction(): Promise<KardexActionResult> {
       console.log("⚠️ [KARDEX] Intentando procesar sin validación Zod...");
 
       try {
-        // Si es un array, devolverlo directamente con un log de advertencia
-        if (Array.isArray(kardexData)) {
+        // Si tiene la estructura esperada con kardex array
+        if (
+          typeof kardexData === "object" &&
+          kardexData !== null &&
+          "kardex" in kardexData &&
+          Array.isArray(kardexData.kardex)
+        ) {
           console.log("⚠️ [KARDEX] Devolviendo datos sin validación completa");
           return {
             success: true,
-            data: kardexData,
+            data: kardexData.kardex,
+            porcentajeAvance: kardexData.porcentaje_avance,
           };
         }
 
-        throw new Error("Los datos no son un array válido");
+        throw new Error("Los datos no tienen la estructura esperada");
       } catch (processingError) {
         console.error(
           "❌ [KARDEX] Error al procesar sin validación:",

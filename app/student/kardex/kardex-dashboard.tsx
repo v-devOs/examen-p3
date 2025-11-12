@@ -34,10 +34,12 @@ export default function KardexDashboard({
     return uniqueSemesters as string[];
   }, [kardexData]);
 
-  // Obtener estatus únicos para el filtro
+  // Obtener descripciones únicas para el filtro (NORMAL / ORDINARIO, REPETICIÓN, etc.)
   const statuses = useMemo(() => {
     const uniqueStatuses = [
-      ...new Set(kardexData.map((subject) => subject.estatus).filter(Boolean)),
+      ...new Set(
+        kardexData.map((subject) => subject.descripcion).filter(Boolean)
+      ),
     ].sort();
     return uniqueStatuses as string[];
   }, [kardexData]);
@@ -52,7 +54,7 @@ export default function KardexDashboard({
         selectedSemester === "all" ||
         subject.semestre?.toString() === selectedSemester;
       const matchesStatus =
-        selectedStatus === "all" || subject.estatus === selectedStatus;
+        selectedStatus === "all" || subject.descripcion === selectedStatus;
       return matchesSearch && matchesSemester && matchesStatus;
     });
   }, [kardexData, searchTerm, selectedSemester, selectedStatus]);
@@ -78,7 +80,7 @@ export default function KardexDashboard({
     const promedio =
       calificaciones.length > 0
         ? calificaciones.reduce((sum, cal) => sum + cal, 0) /
-          calificaciones.length
+        calificaciones.length
         : 0;
 
     const creditosAcumulados = filteredSubjects
@@ -86,7 +88,7 @@ export default function KardexDashboard({
         (subject) =>
           subject.calificacion &&
           parseFloat(subject.calificacion) >= 70 &&
-          subject.estatus?.toLowerCase() !== "reprobada"
+          !subject.descripcion?.toLowerCase().includes("reprobada")
       )
       .reduce((sum, subject) => sum + subject.creditos, 0);
 
@@ -138,12 +140,14 @@ export default function KardexDashboard({
     return "bg-red-50 dark:bg-red-900/20";
   };
 
-  const getStatusColor = (estatus: string | undefined) => {
-    if (!estatus) return "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
-    const status = estatus.toLowerCase();
-    if (status.includes("aprobad")) return "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300";
-    if (status.includes("reprobad")) return "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300";
-    if (status.includes("curso") || status.includes("cursand")) return "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300";
+  const getStatusColor = (descripcion: string | undefined) => {
+    if (!descripcion)
+      return "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
+    const status = descripcion.toLowerCase();
+    if (status.includes("repetición") || status.includes("repeticion"))
+      return "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300";
+    if (status.includes("normal") || status.includes("ordinario"))
+      return "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300";
     return "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
   };
 
@@ -385,13 +389,13 @@ export default function KardexDashboard({
               ))}
             </select>
 
-            {/* Filtro por estatus */}
+            {/* Filtro por tipo (Normal/Ordinario, Repetición) */}
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white"
             >
-              <option value="all">Todos los estatus</option>
+              <option value="all">Todos los tipos</option>
               {statuses.map((status) => (
                 <option key={status} value={status}>
                   {status}
@@ -403,11 +407,10 @@ export default function KardexDashboard({
             <div className="flex gap-2 bg-gray-50 dark:bg-gray-900/50 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => setViewMode("cards")}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  viewMode === "cards"
+                className={`px-4 py-2 rounded-lg transition-all ${viewMode === "cards"
                     ? "bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-md"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }`}
+                  }`}
               >
                 <svg
                   className="w-5 h-5"
@@ -425,11 +428,10 @@ export default function KardexDashboard({
               </button>
               <button
                 onClick={() => setViewMode("table")}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  viewMode === "table"
+                className={`px-4 py-2 rounded-lg transition-all ${viewMode === "table"
                     ? "bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-md"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }`}
+                  }`}
               >
                 <svg
                   className="w-5 h-5"
@@ -559,23 +561,15 @@ export default function KardexDashboard({
                     </div>
                   )}
 
-                  {subject.estatus && (
+                  {subject.descripcion && (
                     <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                       <span
                         className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                          subject.estatus
+                          subject.descripcion
                         )}`}
                       >
-                        {subject.estatus}
+                        {subject.descripcion}
                       </span>
-                    </div>
-                  )}
-
-                  {subject.observaciones && (
-                    <div className="mt-2">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                        {subject.observaciones}
-                      </p>
                     </div>
                   )}
                 </div>
@@ -602,7 +596,7 @@ export default function KardexDashboard({
                       Calificación
                     </th>
                     <th className="px-6 py-4 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                      Estatus
+                      Tipo
                     </th>
                     <th className="px-6 py-4 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Periodo
@@ -641,13 +635,13 @@ export default function KardexDashboard({
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        {subject.estatus && (
+                        {subject.descripcion && (
                           <span
                             className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                              subject.estatus
+                              subject.descripcion
                             )}`}
                           >
-                            {subject.estatus}
+                            {subject.descripcion}
                           </span>
                         )}
                       </td>

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /**
  * Schema para validar una materia individual en el kardex
- * Estructura inicial basada en patrones comunes de kardex académico
+ * Basado en la estructura real del API
  */
 export const kardexSubjectSchema = z.object({
   // Información básica de la materia
@@ -12,34 +12,40 @@ export const kardexSubjectSchema = z.object({
     .union([z.string(), z.number()])
     .transform((val) => (typeof val === "string" ? parseInt(val, 10) : val)),
 
-  // Calificación y estatus
+  // Calificación - puede ser número, string o "AC" (acreditada)
   calificacion: z
     .union([z.string(), z.number(), z.null()])
     .transform((val) => {
       if (val === null || val === undefined) return null;
+      // Si es "AC" (acreditada) o texto no numérico, devolverlo como string
+      if (typeof val === "string" && isNaN(parseFloat(val))) return val;
       const num = typeof val === "string" ? parseFloat(val) : val;
       return isNaN(num) ? null : num.toFixed(2);
     })
     .nullable(),
 
   // Información del periodo
-  periodo: z.string().optional(),
-  semestre: z.union([z.string(), z.number()]).optional(),
+  periodo: z.string(),
+  semestre: z.union([z.string(), z.number()]),
 
-  // Estatus académico
-  estatus: z.string().optional(),
-  tipo_materia: z.string().optional(),
-
-  // Campos adicionales que podrían venir en la respuesta
-  observaciones: z.string().optional(),
-  fecha: z.string().optional(),
-  grupo: z.string().optional(),
+  // Descripción (NORMAL / ORDINARIO, REPETICIÓN, etc.)
+  descripcion: z.string(),
 });
 
 export type KardexSubject = z.infer<typeof kardexSubjectSchema>;
 
 /**
- * Schema para la lista completa de materias del kardex
+ * Schema para la respuesta completa del kardex que incluye porcentaje de avance
+ */
+export const kardexResponseSchema = z.object({
+  porcentaje_avance: z.number(),
+  kardex: z.array(kardexSubjectSchema),
+});
+
+export type KardexResponse = z.infer<typeof kardexResponseSchema>;
+
+/**
+ * Solo el array de materias (para compatibilidad)
  */
 export const kardexListSchema = z.array(kardexSubjectSchema);
 
@@ -51,5 +57,6 @@ export type KardexList = z.infer<typeof kardexListSchema>;
 export interface KardexActionResult {
   success: boolean;
   data?: KardexList;
+  porcentajeAvance?: number;
   error?: string;
 }
