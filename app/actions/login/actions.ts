@@ -50,7 +50,35 @@ export async function loginAction(
 
     const data = await response.json();
 
-    // Verificar si la respuesta fue exitosa
+    // Log para debugging - ver la estructura de la respuesta
+    console.log("Respuesta de la API:", data);
+    console.log("Status HTTP:", response.status);
+
+    // La API devuelve status 200 pero indica el error en data.status
+    // Verificar si hay un error en el body de la respuesta
+    if (data.status && data.status !== 200) {
+      // Mensaje personalizado según el código de error
+      let errorMessage = "";
+      
+      if (data.status === 401) {
+        errorMessage = "Las credenciales ingresadas son incorrectas. Por favor, verifica que tu correo electrónico institucional (@celaya.tecnm.mx) y contraseña sean correctos.";
+      } else if (data.status === 403) {
+        errorMessage = "No tienes permiso para acceder al sistema. Contacta al administrador.";
+      } else if (data.status === 404) {
+        errorMessage = "Usuario no encontrado en el sistema.";
+      } else if (data.status >= 500) {
+        errorMessage = "El servidor está experimentando problemas. Por favor, intenta más tarde.";
+      } else {
+        errorMessage = data.message || data.responseCodeTxt || `Error ${data.status}: No se pudo completar el inicio de sesión.`;
+      }
+      
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    // Verificar si la respuesta HTTP fue exitosa
     if (!response.ok) {
       return {
         success: false,
@@ -60,21 +88,31 @@ export async function loginAction(
     }
 
     // Verificar que se recibió un token
-    if (!data.token) {
+    // La API devuelve el token en data.message.login.token
+    const token = 
+      data.message?.login?.token || 
+      data.token || 
+      data.access_token || 
+      data.data?.token;
+    
+    if (!token || typeof token !== 'string') {
+      console.error("Estructura de respuesta completa:", JSON.stringify(data, null, 2));
       return {
         success: false,
-        error: "No se recibió un token de autenticación",
+        error: "No se recibió un token de autenticación válido",
       };
     }
 
     // Guardar el token en una cookie segura
-    await setAuthToken(data.token);
+    await setAuthToken(token);
+
+    console.log("✅ Login exitoso, token guardado");
 
     return {
       success: true,
       data: {
-        token: data.token,
-        user: data.user,
+        token: token,
+        user: data.user || data.message?.user || data.data?.user,
       },
     };
   } catch (error) {
