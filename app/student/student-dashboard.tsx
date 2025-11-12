@@ -342,7 +342,10 @@ export default function StudentDashboard({
                   </svg>
                 </button>
 
-                <button className="w-full px-4 py-3 bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group">
+                <button
+                  onClick={() => router.push("/student/kardex")}
+                  className="w-full px-4 py-3 bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group"
+                >
                   <span>📚 Kardex</span>
                   <svg
                     className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
