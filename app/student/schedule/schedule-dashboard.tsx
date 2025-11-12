@@ -37,7 +37,7 @@ export default function ScheduleDashboard({
       const matchesSearch =
         clase.nombre_materia.toLowerCase().includes(searchTerm.toLowerCase()) ||
         clase.clave_materia.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        clase.nombre_profesor?.toLowerCase().includes(searchTerm.toLowerCase());
+        clase.aula?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesDay = selectedDay === "all" || clase.dia === selectedDay;
 
@@ -142,7 +142,9 @@ export default function ScheduleDashboard({
                   Mi Horario
                 </h1>
                 {metadata?.periodo && (
-                  <p className="text-gray-600 mt-1">Periodo: {metadata.periodo}</p>
+                  <p className="text-gray-600 mt-1">
+                    Periodo: {metadata.periodo.descripcion_periodo}
+                  </p>
                 )}
               </div>
             </div>
@@ -291,31 +293,28 @@ export default function ScheduleDashboard({
             <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
               <button
                 onClick={() => setViewMode("weekly")}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                  viewMode === "weekly"
-                    ? "bg-white text-blue-600 shadow-md"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${viewMode === "weekly"
+                  ? "bg-white text-blue-600 shadow-md"
+                  : "text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 Semanal
               </button>
               <button
                 onClick={() => setViewMode("daily")}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                  viewMode === "daily"
-                    ? "bg-white text-blue-600 shadow-md"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${viewMode === "daily"
+                  ? "bg-white text-blue-600 shadow-md"
+                  : "text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 Diario
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                  viewMode === "list"
-                    ? "bg-white text-blue-600 shadow-md"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${viewMode === "list"
+                  ? "bg-white text-blue-600 shadow-md"
+                  : "text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 Lista
               </button>
@@ -447,11 +446,10 @@ export default function ScheduleDashboard({
                 <button
                   key={dia}
                   onClick={() => setSelectedDay(dia)}
-                  className={`px-6 py-3 rounded-xl font-medium whitespace-nowrap transition-all ${
-                    selectedDay === dia
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
+                  className={`px-6 py-3 rounded-xl font-medium whitespace-nowrap transition-all ${selectedDay === dia
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
                 >
                   {dia}
                   <span className="ml-2 text-sm">
@@ -587,25 +585,25 @@ export default function ScheduleDashboard({
 
               {(selectedDay === "all" ? filteredClasses : classesByDay[selectedDay] || [])
                 .length === 0 && (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                    <svg
-                      className="w-8 h-8 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
+                  <div className="text-center py-12">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                      <svg
+                        className="w-8 h-8 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500">No hay clases para este día</p>
                   </div>
-                  <p className="text-gray-500">No hay clases para este día</p>
-                </div>
-              )}
+                )}
             </div>
           </div>
         )}

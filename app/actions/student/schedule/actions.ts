@@ -2,12 +2,63 @@
 
 import { getAuthToken } from "../../login/jwt-utils";
 import {
-  scheduleResponseSchema,
+  apiScheduleResponseSchema,
   type ScheduleActionResult,
   type ScheduleList,
+  type ScheduleClass,
+  type RawScheduleItem,
 } from "./schemas";
 
-const API_BASE_URL = "https://cetech.roque.tecnm.mx/api/movil/estudiante";
+const API_BASE_URL = "https://cetech.roque.tecnm.mx/api";
+
+/**
+ * Mapeo de días en español a formato consistente
+ */
+const DIAS_MAP: Record<string, string> = {
+  lunes: "LUNES",
+  martes: "MARTES",
+  miercoles: "MIÉRCOLES",
+  jueves: "JUEVES",
+  viernes: "VIERNES",
+  sabado: "SÁBADO",
+};
+
+/**
+ * Transforma una materia RAW del API a múltiples clases (una por cada día que tenga horario)
+ */
+function transformRawScheduleItem(item: RawScheduleItem): ScheduleClass[] {
+  const classes: ScheduleClass[] = [];
+
+  // Iterar sobre cada día de la semana
+  Object.keys(DIAS_MAP).forEach((diaKey) => {
+    const horario = item[diaKey as keyof RawScheduleItem] as string | null;
+    const aula = item[`${diaKey}_clave_salon` as keyof RawScheduleItem] as
+      | string
+      | null;
+
+    // Si hay horario para este día, crear una clase
+    if (horario && horario.trim() !== "") {
+      // Parsear horario "07:00-09:00"
+      const [hora_inicio, hora_fin] = horario.split("-").map((h) => h.trim());
+
+      classes.push({
+        id_grupo: item.id_grupo,
+        clave_materia: item.clave_materia,
+        nombre_materia: item.nombre_materia,
+        letra_grupo: item.letra_grupo,
+        dia: DIAS_MAP[diaKey],
+        hora_inicio,
+        hora_fin,
+        aula: aula || undefined,
+        nombre_plan: item.nombre_plan,
+        clave_turno: item.clave_turno,
+        letra_nivel: item.letra_nivel,
+      });
+    }
+  });
+
+  return classes;
+}
 
 /**
  * Obtiene el horario del estudiante autenticado
@@ -29,7 +80,11 @@ export async function getScheduleAction(): Promise<ScheduleActionResult> {
     console.log("🔑 [HORARIO] Token obtenido correctamente");
 
     // 2. Hacer petición al endpoint de horario
-    const response = await fetch(`${API_BASE_URL}/horario`, {
+    console.log(
+      `📡 [HORARIO] Haciendo petición GET a: ${API_BASE_URL}/movil/estudiante/horarios`
+    );
+
+    const response = await fetch(`${API_BASE_URL}/movil/estudiante/horarios`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -54,140 +109,80 @@ export async function getScheduleAction(): Promise<ScheduleActionResult> {
     }
 
     // 3. Parsear respuesta
-    const scheduleData = await response.json();
+    const apiResponse = await response.json();
     console.log("📋 [HORARIO] Respuesta completa de la API:");
-    console.log(JSON.stringify(scheduleData, null, 2));
+    console.log(JSON.stringify(apiResponse, null, 2));
 
-    // 4. Detectar estructura de la respuesta
-    const isArray = Array.isArray(scheduleData);
-    const isObjectWithHorario =
-      typeof scheduleData === "object" &&
-      scheduleData !== null &&
-      "horario" in scheduleData;
-
-    console.log("🔍 [HORARIO] Análisis de estructura:");
-    console.log("  - ¿Es array directo?:", isArray);
-    console.log("  - ¿Es objeto con 'horario'?:", isObjectWithHorario);
-
-    if (isArray) {
-      console.log("  - Número de clases:", scheduleData.length);
-      if (scheduleData.length > 0) {
-        console.log(
-          "  - Primera clase:",
-          JSON.stringify(scheduleData[0], null, 2)
-        );
-      }
-    } else if (isObjectWithHorario) {
-      console.log("  - Número de clases:", scheduleData.horario?.length || 0);
-      console.log("  - Periodo:", scheduleData.periodo);
-      console.log("  - Semestre actual:", scheduleData.semestre_actual);
-      console.log("  - Total materias:", scheduleData.total_materias);
-      console.log("  - Total créditos:", scheduleData.total_creditos);
-      if (scheduleData.horario?.length > 0) {
-        console.log(
-          "  - Primera clase:",
-          JSON.stringify(scheduleData.horario[0], null, 2)
-        );
-      }
-    } else {
-      console.log("  - Tipo de dato:", typeof scheduleData);
-      console.log("  - Propiedades:", Object.keys(scheduleData || {}));
-    }
-
-    // 5. Validar con Zod
-    let validatedData;
+    // 4. Validar estructura de la API
+    let validatedApiResponse;
     try {
-      validatedData = scheduleResponseSchema.parse(scheduleData);
-      console.log("✅ [HORARIO] Datos validados correctamente con Zod");
+      validatedApiResponse = apiScheduleResponseSchema.parse(apiResponse);
+      console.log("✅ [HORARIO] Respuesta del API validada correctamente");
     } catch (zodError) {
       console.error("❌ [HORARIO] Error de validación Zod:", zodError);
       console.error(
         "📋 [HORARIO] Datos que causaron el error:",
-        JSON.stringify(scheduleData, null, 2)
+        JSON.stringify(apiResponse, null, 2)
       );
-
-      // Intentar procesar de todos modos si es un array
-      if (isArray) {
-        console.log(
-          "⚠️ [HORARIO] Intentando procesar array sin validación estricta..."
-        );
-        return {
-          success: true,
-          data: scheduleData as ScheduleList,
-        };
-      }
-
-      // Intentar extraer horario si es objeto
-      if (isObjectWithHorario && Array.isArray(scheduleData.horario)) {
-        console.log("⚠️ [HORARIO] Intentando extraer 'horario' del objeto...");
-        return {
-          success: true,
-          data: scheduleData.horario as ScheduleList,
-          metadata: {
-            periodo: scheduleData.periodo,
-            semestreActual: scheduleData.semestre_actual,
-            totalMaterias: scheduleData.total_materias,
-            totalCreditos: scheduleData.total_creditos,
-          },
-        };
-      }
-
       return {
         success: false,
-        error: "Error al validar estructura de horario",
+        error: "Error al validar estructura del horario del API",
       };
     }
 
-    // 6. Extraer datos según estructura
-    let scheduleList: ScheduleList;
-    let metadata: ScheduleActionResult["metadata"];
-
-    if (Array.isArray(validatedData)) {
-      scheduleList = validatedData;
-      console.log(
-        "📦 [HORARIO] Datos extraídos (array directo):",
-        scheduleList.length,
-        "clases"
-      );
-    } else {
-      scheduleList = validatedData.horario;
-      metadata = {
-        periodo: validatedData.periodo,
-        semestreActual: validatedData.semestre_actual,
-        totalMaterias: validatedData.total_materias,
-        totalCreditos: validatedData.total_creditos,
+    // 5. Extraer el horario del primer elemento del array data
+    if (validatedApiResponse.data.length === 0) {
+      console.log("⚠️ [HORARIO] No hay datos de horario en la respuesta");
+      return {
+        success: true,
+        data: [],
+        metadata: {
+          totalMaterias: 0,
+        },
       };
-      console.log("📦 [HORARIO] Datos extraídos (objeto):");
-      console.log("  - Clases:", scheduleList.length);
-      console.log("  - Metadata:", metadata);
     }
+
+    const { periodo, horario: rawHorario } = validatedApiResponse.data[0];
+    console.log("📅 [HORARIO] Periodo:", periodo.descripcion_periodo);
+    console.log("� [HORARIO] Materias RAW encontradas:", rawHorario.length);
+
+    // 6. Transformar horarios RAW a formato normalizado
+    const allClasses: ScheduleClass[] = [];
+    rawHorario.forEach((item) => {
+      const transformedClasses = transformRawScheduleItem(item);
+      allClasses.push(...transformedClasses);
+    });
+
+    console.log("� [HORARIO] Clases transformadas:", allClasses.length);
 
     // 7. Análisis de días y horarios
     const diasUnicos = [
-      ...new Set(scheduleList.map((clase) => clase.dia)),
+      ...new Set(allClasses.map((clase) => clase.dia)),
     ].sort();
     const materiasUnicas = [
-      ...new Set(scheduleList.map((clase) => clase.clave_materia)),
+      ...new Set(allClasses.map((clase) => clase.clave_materia)),
     ];
 
     console.log("📊 [HORARIO] Análisis de datos:");
-    console.log("  - Total de clases:", scheduleList.length);
+    console.log("  - Total de clases (sesiones):", allClasses.length);
     console.log("  - Materias únicas:", materiasUnicas.length);
     console.log("  - Días de clase:", diasUnicos);
-    console.log("  - Materias:", materiasUnicas);
 
     // Mostrar resumen por día
     diasUnicos.forEach((dia) => {
-      const clasesPorDia = scheduleList.filter((clase) => clase.dia === dia);
-      console.log(`  - ${dia}: ${clasesPorDia.length} clases`);
+      const clasesPorDia = allClasses.filter((clase) => clase.dia === dia);
+      console.log(`  - ${dia}: ${clasesPorDia.length} sesiones`);
     });
 
-    console.log("✅ [HORARIO] Horario obtenido exitosamente");
+    console.log("✅ [HORARIO] Horario obtenido y transformado exitosamente");
 
     return {
       success: true,
-      data: scheduleList,
-      metadata,
+      data: allClasses,
+      metadata: {
+        periodo,
+        totalMaterias: materiasUnicas.length,
+      },
     };
   } catch (error) {
     console.error("❌ [HORARIO] Error inesperado:", error);

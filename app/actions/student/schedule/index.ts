@@ -5,11 +5,15 @@
 export { getScheduleAction, refreshScheduleAction } from "./actions";
 
 export {
+  periodSchema,
+  rawScheduleItemSchema,
+  apiScheduleResponseSchema,
   scheduleClassSchema,
   scheduleListSchema,
-  scheduleResponseSchema,
+  type Period,
+  type RawScheduleItem,
+  type ApiScheduleResponse,
   type ScheduleClass,
   type ScheduleList,
-  type ScheduleResponse,
   type ScheduleActionResult,
 } from "./schemas";
