@@ -94,17 +94,26 @@ pnpm install
 bun install
 ```
 
-3. **Configurar variables de entorno** (opcional)
+3. **Configurar variables de entorno**
 
-Crea un archivo `.env.local` en la raíz del proyecto si necesitas configurar variables personalizadas:
+Crea un archivo `.env.local` en la raíz del proyecto (puedes copiar desde `.env.example`):
+
+```bash
+cp .env.example .env.local
+```
+
+**⚠️ IMPORTANTE para VPS con HTTP (sin SSL):**
+
+Si vas a desplegar en un VPS que funciona con HTTP (sin HTTPS), debes configurar:
 
 ```env
-# URL de la API (ya está configurada por defecto)
-NEXT_PUBLIC_API_URL=https://siia.dgi.tecnm.mx
-
-# Otros ajustes
-NODE_ENV=development
+# .env.local
+NEXT_PUBLIC_ALLOW_HTTP=true
 ```
+
+Esto permite que las cookies de autenticación funcionen en HTTP. **No uses esta configuración en producción con datos sensibles.**
+
+Para desarrollo local o producción con HTTPS, no necesitas configurar nada adicional.
 
 ## 🎯 Ejecución
 
@@ -157,6 +166,69 @@ npm run start        # Inicia servidor de producción
 # Calidad de Código
 npm run lint         # Ejecuta ESLint para verificar el código
 ```
+
+## 🌐 Despliegue en VPS
+
+### Configuración para VPS sin SSL (HTTP)
+
+Si tu VPS funciona con HTTP (sin certificado SSL/HTTPS), sigue estos pasos:
+
+1. **Crear archivo de configuración**
+
+```bash
+nano .env.local
+```
+
+2. **Agregar la siguiente configuración**
+
+```env
+NODE_ENV=production
+NEXT_PUBLIC_ALLOW_HTTP=true
+```
+
+3. **Construir y ejecutar**
+
+```bash
+npm run build
+npm run start
+```
+
+4. **Verificar que funciona**
+
+- Las cookies de autenticación ahora funcionarán en HTTP
+- El login debería mantener la sesión correctamente
+- Revisa la consola del navegador para confirmar que no hay errores de cookies
+
+### ⚠️ Recomendaciones de Seguridad
+
+Para un entorno de producción real:
+
+1. **Usa HTTPS**: Obtén un certificado SSL gratuito con [Let's Encrypt](https://letsencrypt.org/)
+2. **Configura un proxy inverso**: Usa Nginx o Apache con SSL
+3. **No uses `NEXT_PUBLIC_ALLOW_HTTP=true`** en producción con datos sensibles
+
+```bash
+# Ejemplo de configuración con SSL
+# No necesitas NEXT_PUBLIC_ALLOW_HTTP
+NODE_ENV=production
+```
+
+### Solución de Problemas Comunes
+
+**Problema**: Las cookies no se guardan después del login en VPS
+
+**Solución**:
+
+1. Verifica que `.env.local` existe y contiene `NEXT_PUBLIC_ALLOW_HTTP=true`
+2. Reinicia el servidor después de cambiar las variables de entorno
+3. Limpia las cookies del navegador y vuelve a intentar
+
+**Problema**: "Cookie blocked - secure attribute"
+
+**Solución**: Esto ocurre cuando `secure=true` en HTTP. Asegúrate de:
+
+- Tener `NEXT_PUBLIC_ALLOW_HTTP=true` en `.env.local`
+- Reiniciar el servidor con `npm run build && npm run start`
 
 ## 📁 Estructura del Proyecto
 

@@ -10,9 +10,15 @@ const TOKEN_MAX_AGE = 60 * 60; // 1 hora en segundos (ajusta según tu API)
 export async function setAuthToken(token: string): Promise<void> {
   const cookieStore = await cookies();
 
+  // Detectar si estamos en HTTPS o HTTP
+  const isSecure =
+    process.env.NEXT_PUBLIC_FORCE_SECURE === "true" ||
+    (process.env.NODE_ENV === "production" &&
+      process.env.NEXT_PUBLIC_ALLOW_HTTP !== "true");
+
   cookieStore.set(TOKEN_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecure,
     sameSite: "lax",
     maxAge: TOKEN_MAX_AGE,
     path: "/",
