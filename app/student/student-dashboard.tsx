@@ -362,7 +362,10 @@ export default function StudentDashboard({
                   </svg>
                 </button>
 
-                <button className="w-full px-4 py-3 bg-linear-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group">
+                <button
+                  onClick={() => router.push("/student/schedule")}
+                  className="w-full px-4 py-3 bg-linear-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-medium rounded-xl shadow-lg transition-all flex items-center justify-between group"
+                >
                   <span>🕒 Horarios</span>
                   <svg
                     className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
