@@ -11,15 +11,25 @@ const API_BASE_URL = "https://cetech.roque.tecnm.mx/api";
  */
 export async function getStudentInfoAction(): Promise<StudentInfoActionResult> {
   try {
+    console.log("🔍 [STUDENT INFO] Iniciando obtención de información del estudiante...");
+    
     // Obtener el token de autenticación de las cookies
     const token = await getAuthToken();
+    console.log("🔑 [STUDENT INFO] Token obtenido:", token ? "✓ Token presente" : "✗ Sin token");
 
     if (!token) {
+      console.error("❌ [STUDENT INFO] No hay token de autenticación");
       return {
         success: false,
         error: "No hay sesión activa. Por favor, inicia sesión nuevamente.",
       };
     }
+
+    console.log(`📡 [STUDENT INFO] Haciendo petición GET a: ${API_BASE_URL}/movil/estudiante`);
+    console.log("📋 [STUDENT INFO] Headers:", {
+      Authorization: `Bearer ${token.substring(0, 20)}...`,
+      "Content-Type": "application/json",
+    });
 
     // Realizar la petición a la API
     const response = await fetch(`${API_BASE_URL}/movil/estudiante`, {
@@ -31,14 +41,29 @@ export async function getStudentInfoAction(): Promise<StudentInfoActionResult> {
       cache: "no-store", // Evitar cache para obtener datos actualizados
     });
 
+    console.log(`📊 [STUDENT INFO] Status HTTP recibido: ${response.status} ${response.statusText}`);
+    
     const data = await response.json();
 
-    // Log para debugging
-    console.log("Respuesta del endpoint estudiante:", data);
-    console.log("Status HTTP:", response.status);
+    // Logs detallados para debugging
+    console.log("📦 [STUDENT INFO] Respuesta completa del servidor:");
+    console.log(JSON.stringify(data, null, 2));
+    console.log("🔍 [STUDENT INFO] Estructura de la respuesta:", {
+      responseCodeTxt: data.responseCodeTxt,
+      status: data.status,
+      flag: data.flag,
+      type: data.type,
+      hasMessage: !!data.message,
+      hasData: !!data.data,
+      dataType: typeof data.data,
+    });
 
     // Verificar si hay un error en el body de la respuesta
     if (data.status && data.status !== 200) {
+      console.error(`❌ [STUDENT INFO] Error en la respuesta - Status: ${data.status}`);
+      console.error("📄 [STUDENT INFO] Mensaje de error:", data.message);
+      console.error("📄 [STUDENT INFO] Código de respuesta:", data.responseCodeTxt);
+      
       let errorMessage = "";
 
       if (data.status === 401) {
@@ -58,6 +83,7 @@ export async function getStudentInfoAction(): Promise<StudentInfoActionResult> {
           `Error ${data.status}: No se pudo obtener la información.`;
       }
 
+      console.error(`💬 [STUDENT INFO] Mensaje de error final: ${errorMessage}`);
       return {
         success: false,
         error: errorMessage,
@@ -66,6 +92,7 @@ export async function getStudentInfoAction(): Promise<StudentInfoActionResult> {
 
     // Verificar si la respuesta HTTP fue exitosa
     if (!response.ok) {
+      console.error(`❌ [STUDENT INFO] Respuesta HTTP no exitosa: ${response.status}`);
       return {
         success: false,
         error: data.message || "Error al obtener la información del estudiante",
@@ -73,29 +100,41 @@ export async function getStudentInfoAction(): Promise<StudentInfoActionResult> {
     }
 
     // Extraer los datos del estudiante
-    // La estructura puede variar, ajusta según la respuesta real
+    console.log("🔎 [STUDENT INFO] Intentando extraer datos del estudiante...");
+    console.log("📍 [STUDENT INFO] Buscando en data.data:", !!data.data);
+    console.log("📍 [STUDENT INFO] Buscando en data.message.student:", !!data.message?.student);
+    console.log("📍 [STUDENT INFO] Buscando en data.message.estudiante:", !!data.message?.estudiante);
+    
     const studentData =
       data.data || data.message?.student || data.message?.estudiante || data;
 
+    console.log("📦 [STUDENT INFO] Datos extraídos del estudiante:");
+    console.log(JSON.stringify(studentData, null, 2));
+
     if (!studentData || typeof studentData !== "object") {
-      console.error(
-        "Estructura de respuesta completa:",
-        JSON.stringify(data, null, 2)
-      );
+      console.error("❌ [STUDENT INFO] No se pudo extraer información válida del estudiante");
+      console.error("📄 [STUDENT INFO] Estructura de respuesta completa:");
+      console.error(JSON.stringify(data, null, 2));
       return {
         success: false,
         error: "No se recibió información válida del estudiante",
       };
     }
 
-    console.log("✅ Información del estudiante obtenida exitosamente");
+    console.log("✅ [STUDENT INFO] Información del estudiante obtenida exitosamente");
+    console.log("📊 [STUDENT INFO] Campos disponibles:", Object.keys(studentData));
 
     return {
       success: true,
       data: studentData,
     };
   } catch (error) {
-    console.error("Error en getStudentInfoAction:", error);
+    console.error("💥 [STUDENT INFO] Excepción capturada:", error);
+    console.error("📄 [STUDENT INFO] Detalles del error:", {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return {
       success: false,
       error:
@@ -110,6 +149,7 @@ export async function getStudentInfoAction(): Promise<StudentInfoActionResult> {
  * @returns Resultado con la información actualizada del estudiante
  */
 export async function refreshStudentInfoAction(): Promise<StudentInfoActionResult> {
+  console.log("🔄 [STUDENT INFO] Refrescando información del estudiante...");
   // Reutiliza la misma lógica pero sin caché
   return getStudentInfoAction();
 }
