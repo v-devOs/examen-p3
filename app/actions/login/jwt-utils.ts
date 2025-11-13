@@ -11,14 +11,9 @@ export async function setAuthToken(token: string): Promise<void> {
   const cookieStore = await cookies();
 
   // Detectar si estamos en HTTPS o HTTP
-  const isSecure =
-    process.env.NEXT_PUBLIC_FORCE_SECURE === "true" ||
-    (process.env.NODE_ENV === "production" &&
-      process.env.NEXT_PUBLIC_ALLOW_HTTP !== "true");
-
   cookieStore.set(TOKEN_NAME, token, {
     httpOnly: true,
-    secure: isSecure,
+    secure: false, // <-- fuerza a permitir HTTP
     sameSite: "lax",
     maxAge: TOKEN_MAX_AGE,
     path: "/",
