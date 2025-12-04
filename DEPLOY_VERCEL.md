@@ -3,6 +3,7 @@
 ## Prerrequisitos
 
 1. **Base de datos PostgreSQL accesible desde internet**
+
    - No puede ser `localhost`
    - Opciones recomendadas:
      - [Neon](https://neon.tech) - PostgreSQL serverless (GRATIS)
@@ -62,6 +63,7 @@ npx prisma db pull
 4. Importa tu repositorio de GitHub
 
 5. **Configurar Variables de Entorno:**
+
    - Ve a "Environment Variables"
    - Agrega:
      ```
@@ -70,6 +72,7 @@ npx prisma db pull
    - Asegúrate de que sea la URL de producción (NO localhost)
 
 6. **Configuración del Build:**
+
    - Framework Preset: Next.js (se detecta automáticamente)
    - Build Command: `npm run build` (ya configurado)
    - Output Directory: `.next` (automático)
@@ -122,11 +125,13 @@ git push
 ### Variables de Entorno
 
 Tu `.env` local tiene:
+
 ```
 DATABASE_URL="postgresql://admin:admin123@localhost:5440/proyecto_final_db?schema=public"
 ```
 
 **NO uses esta URL en producción** porque:
+
 - `localhost` no es accesible desde Vercel
 - Es tu base de datos local de desarrollo
 
@@ -137,6 +142,7 @@ postgresql://[usuario]:[contraseña]@[host]:[puerto]/[database]?schema=public&ss
 ```
 
 Ejemplo con Neon:
+
 ```
 postgresql://user:pass@ep-cool-name-123456.us-east-2.aws.neon.tech/neondb?sslmode=require
 ```
@@ -155,13 +161,15 @@ Después del despliegue, verifica:
 ### Error: "Cannot find module '@prisma/client'"
 
 **Solución:** Asegúrate de que `postinstall` esté en `package.json`:
+
 ```json
 "postinstall": "prisma generate"
 ```
 
 ### Error: "Can't reach database server"
 
-**Solución:** 
+**Solución:**
+
 - Verifica que `DATABASE_URL` esté configurada en Vercel
 - Asegúrate de que la base de datos permita conexiones externas
 - Revisa que incluya `?sslmode=require` si es necesario
@@ -169,12 +177,14 @@ Después del despliegue, verifica:
 ### Error: "Invalid `prisma.xxx.findMany()` invocation"
 
 **Solución:**
+
 - Asegúrate de que el schema de la base de datos coincida
 - Ejecuta `npx prisma db push` en la base de datos de producción
 
 ### Error de build: "prisma generate failed"
 
 **Solución:**
+
 - Verifica que `prisma` esté en `dependencies` (no en `devDependencies`)
 - Ya está configurado correctamente en tu `package.json`
 
@@ -190,6 +200,7 @@ Para ver logs en producción:
 ## 🔐 Seguridad
 
 ✅ **Ya configurado:**
+
 - `.env` está en `.gitignore`
 - Las variables de entorno se configuran en Vercel
 - La cadena de conexión no se expone en el código
@@ -197,6 +208,7 @@ Para ver logs en producción:
 ## 📱 URLs de tu Aplicación
 
 Después del despliegue, tendrás:
+
 - **Producción:** `https://tu-proyecto.vercel.app`
 - **Preview:** `https://tu-proyecto-git-branch.vercel.app` (por cada branch)
 
@@ -205,6 +217,7 @@ Después del despliegue, tendrás:
 Tu aplicación con Prisma está lista para producción en Vercel.
 
 Para actualizaciones futuras, solo haz:
+
 ```bash
 git add .
 git commit -m "Update"
