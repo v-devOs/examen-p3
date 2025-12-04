@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model admins {
+  id            Int      @id @default(autoincrement())
+  first_name    String   @db.VarChar(100)
+  last_name     String   @db.VarChar(100)
+  email         String   @unique @db.VarChar(150)
+  password_hash String   @db.VarChar(255)
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  active        Boolean  @default(true)
+  staff         staff[]
+
+  @@index([email])
+}
+
+model appointments {
+  id                   Int                 @id @default(autoincrement())
+  patient_id           Int
+  staff_id             Int
+  appointment_date     DateTime            @db.Date
+  start_time           DateTime            @db.Time(6)
+  end_time             DateTime            @db.Time(6)
+  status               appointment_status  @default(pending)
+  consultation_type    String?             @db.VarChar(50)
+  notes                String?
+  consultation_room_id Int?
+  created_at           DateTime            @default(now()) @db.Timestamp(6)
+  created_by           Int?
+  consultation_rooms   consultation_rooms? @relation(fields: [consultation_room_id], references: [id])
+  patients             patients            @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  staff                staff               @relation(fields: [staff_id], references: [id], onDelete: Cascade)
+
+  @@unique([staff_id, appointment_date, start_time])
+  @@index([patient_id, appointment_date])
+  @@index([staff_id, appointment_date])
+  @@index([staff_id, status])
+  @@index([status])
+}
+
+model consultation_rooms {
+  id           Int            @id @default(autoincrement())
+  code         String         @unique @db.VarChar(20)
+  name         String         @db.VarChar(100)
+  location     String         @db.VarChar(200)
+  capacity     Int            @default(1)
+  active       Boolean        @default(true)
+  appointments appointments[]
+  staff        staff[]
+}
+
+model patients {
+  id                    Int            @id @default(autoincrement())
+  email                 String         @unique @db.VarChar(150)
+  registered_date       DateTime       @default(now()) @db.Date
+  active                Boolean        @default(true)
+  assigned_psychologist Int?
+  first_name            String         @db.VarChar(100)
+  last_name             String         @db.VarChar(100)
+  nu_control            String         @unique @db.VarChar(50)
+  appointments          appointments[]
+  staff                 staff?         @relation(fields: [assigned_psychologist], references: [id])
+
+  @@index([active])
+  @@index([assigned_psychologist])
+  @@index([email])
+  @@index([nu_control])
+}
+
+model schedules {
+  id          Int      @id @default(autoincrement())
+  staff_id    Int
+  day_of_week Int
+  start_time  DateTime @db.Time(6)
+  end_time    DateTime @db.Time(6)
+  available   Boolean  @default(true)
+  staff       staff    @relation(fields: [staff_id], references: [id], onDelete: Cascade)
+
+  @@unique([staff_id, day_of_week, start_time])
+  @@index([day_of_week])
+  @@index([staff_id])
+}
+
+model staff {
+  id                   Int                 @id @default(autoincrement())
+  first_name           String              @db.VarChar(100)
+  last_name            String              @db.VarChar(100)
+  email                String              @unique @db.VarChar(150)
+  password_hash        String              @db.VarChar(255)
+  phone                String?             @db.VarChar(20)
+  date_of_birth        DateTime?           @db.Date
+  hire_date            DateTime            @default(now()) @db.Date
+  consultation_room_id Int?
+  active               Boolean             @default(true)
+  created_at           DateTime            @default(now()) @db.Timestamp(6)
+  created_by           Int?
+  appointments         appointments[]
+  patients             patients[]
+  schedules            schedules[]
+  consultation_rooms   consultation_rooms? @relation(fields: [consultation_room_id], references: [id])
+  admins               admins?             @relation(fields: [created_by], references: [id])
+
+  @@index([active])
+  @@index([consultation_room_id])
+  @@index([email])
+}
+
+enum appointment_status {
+  pending
+  confirmed
+  completed
+  cancelled
+  no_show
+}
